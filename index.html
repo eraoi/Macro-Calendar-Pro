@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Macro Calendar Pro</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #131722; color: #e0e3eb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; height: 100vh; overflow: hidden; }
+        
+        .header {
+            height: 50px;
+            background-color: #1e222d;
+            border-bottom: 1px solid #2a2e39;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+        }
+        
+        .header h1 { font-size: 18px; margin: 0; color: #f0b90b; font-weight: 600; }
+        .header span { font-size: 12px; color: #787b86; margin-left: 10px; border-left: 1px solid #363a45; padding-left: 10px; }
+
+        .lang-btn {
+            background-color: #2a2e39; color: #d1d4dc; border: 1px solid #363a45;
+            padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; transition: all 0.2s;
+        }
+        .lang-btn:hover { background-color: #363a45; color: #fff; border-color: #f0b90b; }
+
+        .main-container { display: flex; height: calc(100vh - 50px); }
+
+        /* 左侧：日历 */
+        .calendar-section { flex: 3; border-right: 1px solid #2a2e39; position: relative; }
+
+        /* 右侧：深度分析 */
+        .cheat-sheet {
+            flex: 1.2; /* 稍微加宽右侧 */
+            padding: 0;
+            background-color: #131722;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scroll-content { padding: 20px; }
+
+        .section-title {
+            font-size: 15px; color: #f0b90b; margin-bottom: 15px; border-bottom: 1px solid #2a2e39; padding-bottom: 8px; font-weight: bold;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .cheat-card {
+            background: #1e222d; border: 1px solid #2a2e39; border-radius: 6px; padding: 15px; margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .cheat-card h3 { margin: 0 0 8px 0; font-size: 14px; color: #fff; display: flex; justify-content: space-between; }
+        .cheat-card p { margin: 0 0 6px 0; font-size: 13px; color: #b2b5be; line-height: 1.5; }
+        
+        /* 历史波动标签 */
+        .volatility-tag {
+            font-size: 11px; background: #2a2e39; padding: 2px 6px; border-radius: 3px; color: #9db2bf; border: 1px solid #363a45;
+        }
+        
+        .impact-box {
+            background: #131722; border-radius: 4px; padding: 10px; margin-top: 10px; border: 1px solid #2a2e39;
+        }
+        .impact-title { font-size: 12px; color: #787b86; margin-bottom: 5px; font-weight: bold; }
+        .impact-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+
+        .bullish { color: #089981; font-weight: bold; }
+        .bearish { color: #f23645; font-weight: bold; }
+        .neutral { color: #f0b90b; font-weight: bold; }
+        .highlight { color: #e0e3eb; font-weight: bold; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #131722; }
+        ::-webkit-scrollbar-thumb { background: #363a45; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div style="display:flex; align-items:center;">
+            <h1 id="txt-title">Macro Calendar Pro</h1>
+            <span id="txt-timezone">🕒 时间已锁定：北京时间 (UTC+8)</span>
+        </div>
+        <button class="lang-btn" onclick="toggleLanguage()">🌐 EN / CN</button>
+    </div>
+
+    <div class="main-container">
+        <!-- 左侧日历 -->
+        <div class="calendar-section">
+            <div class="tradingview-widget-container" id="tv-widget-box" style="width: 100%; height: 100%;"></div>
+        </div>
+
+        <!-- 右侧深度逻辑 -->
+        <div class="cheat-sheet">
+            <div class="scroll-content">
+                
+                <div class="section-title">
+                    <span id="txt-sec-critical">🔥 核心宏观事件 (Tier 1)</span>
+                </div>
+
+                <!-- CPI 深度卡片 -->
+                <div class="cheat-card">
+                    <h3>
+                        <span id="t-cpi">🇺🇸 CPI 通胀数据</span>
+                        <span class="volatility-tag" id="v-cpi">波动: High</span>
+                    </h3>
+                    <p id="d-cpi">美联储决策的基石。决定是"加息"还是"降息"。</p>
+                    <div class="impact-box">
+                        <div class="impact-title" id="h-cpi-hist">📊 历史波动 (过去5次平均)</div>
+                        <div class="impact-row"><span>1m Candle:</span> <span class="highlight">±1.5% - 2.5%</span></div>
+                        <div class="impact-row"><span>Daily Range:</span> <span class="highlight">±4.0% - 6.0%</span></div>
+                    </div>
+                    <hr style="border:0; border-top:1px solid #363a45; margin:10px 0;">
+                    <p><span id="res-cpi-high">高于预期 > 0.2%:</span> <span class="bearish">Crash (利空)</span></p>
+                    <p><span id="res-cpi-low">低于预期 > 0.2%:</span> <span class="bullish">Pump (利多)</span></p>
+                    <p style="font-size:12px; color:#f0b90b; margin-top:5px;" id="note-cpi">⚠️ 注意：如果发布值与预测值一致，通常会"利多落地"转跌。</p>
+                </div>
+
+                <!-- NFP 深度卡片 -->
+                <div class="cheat-card">
+                    <h3>
+                        <span id="t-nfp">🇺🇸 NFP 非农就业</span>
+                        <span class="volatility-tag" id="v-nfp">波动: High</span>
+                    </h3>
+                    <p id="d-nfp">也是"骗线"之王。需结合失业率一起看。</p>
+                    <div class="impact-box">
+                        <div class="impact-title" id="h-nfp-logic">🧠 交易员阈值逻辑</div>
+                        <div class="impact-row"><span>< 100k:</span> <span class="bearish" id="nfp-recession">衰退恐慌 (BTC 跌)</span></div>
+                        <div class="impact-row"><span>150k - 250k:</span> <span class="neutral" id="nfp-goldilocks">金发姑娘 (震荡向上)</span></div>
+                        <div class="impact-row"><span>> 300k:</span> <span class="bearish" id="nfp-hot">经济过热/加息 (BTC 跌)</span></div>
+                    </div>
+                    <p style="font-size:12px; color:#888; margin-top:5px;" id="note-nfp">💡 提示：NFP 公布后的第一根 1分钟 K线通常是假动作。</p>
+                </div>
+
+                <!-- FOMC 深度卡片 -->
+                <div class="cheat-card">
+                    <h3>
+                        <span id="t-fomc">🏛️ FOMC 利率决议</span>
+                        <span class="volatility-tag" id="v-fomc">波动: Extreme</span>
+                    </h3>
+                    <p id="d-fomc">包含：决议(2:00) + 点阵图 + 鲍威尔讲话(2:30)。</p>
+                    <div class="impact-box">
+                        <div class="impact-title" id="h-fomc-dot">📉 点阵图 (Dot Plot) 才是重点</div>
+                        <p style="font-size:12px; color:#b2b5be;" id="exp-dot">不要只看当下加不加息，要看官员对"年底利率"的预测中位数是上移还是下移。</p>
+                    </div>
+                    <hr style="border:0; border-top:1px solid #363a45; margin:10px 0;">
+                    <p><span id="res-hawk">鹰派发言:</span> <span class="bearish">USD 涨 / BTC 跌</span></p>
+                    <p><span id="res-dove">鸽派发言:</span> <span class="bullish">USD 跌 / BTC 涨</span></p>
+                </div>
+
+                <div class="section-title">
+                    <span id="txt-sec-special">⚡ 特殊形态提醒</span>
+                </div>
+
+                <!-- Super Week -->
+                <div class="cheat-card" style="border-left: 3px solid #f0b90b;">
+                    <h3><span id="t-super">💣 超级周 (Super Week)</span></h3>
+                    <p id="d-super">定义：当 CPI (周二) 和 FOMC (周三) 在同一周。</p>
+                    <p style="margin-top:5px;"><span class="neutral" id="adv-super">策略：全周降低杠杆，不做日内波段。等待周四趋势明朗。</span></p>
+                </div>
+
+                <!-- PPI & Jobless -->
+                <div class="cheat-card">
+                    <h3><span id="t-ppi">PPI & 初请失业金</span></h3>
+                    <p id="d-ppi">通常周四晚公布。重要性次于 CPI，但如果 CPI 没方向，PPI 会补刀。</p>
+                </div>
+
+                <p id="txt-footer" style="font-size:11px; color:#555; text-align:center; margin-top:20px;">
+                    数据波动仅供参考。市场永远是对的。<br>Always DYOR.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        let currentLang = 'zh';
+
+        const i18n = {
+            zh: {
+                title: "Macro Calendar Pro",
+                timezone: "🕒 时间已锁定：北京时间 (UTC+8)",
+                secCritical: "🔥 核心宏观事件 (Tier 1)",
+                secSpecial: "⚡ 特殊形态提醒",
+                
+                // CPI
+                tCpi: "🇺🇸 CPI 通胀数据",
+                vCpi: "波动: 高",
+                dCpi: "美联储决策的基石。决定是'加息'还是'降息'。",
+                hCpiHist: "📊 历史波动 (过去5次平均)",
+                resCpiHigh: "高于预期 > 0.2%:",
+                resCpiLow: "低于预期 > 0.2%:",
+                noteCpi: "⚠️ 注意：如果发布值与预测值一致，通常会'利多落地'转跌。",
+
+                // NFP
+                tNfp: "🇺🇸 NFP 非农就业",
+                vNfp: "波动: 高",
+                dNfp: "也是'骗线'之王。需结合失业率一起看。",
+                hNfpLogic: "🧠 交易员阈值逻辑",
+                nfpRecession: "衰退恐慌 (BTC 跌)",
+                nfpGoldilocks: "金发姑娘 (震荡向上)",
+                nfpHot: "经济过热/加息 (BTC 跌)",
+                noteNfp: "💡 提示：NFP 公布后的第一根 1分钟 K线通常是假动作。",
+
+                // FOMC
+                tFomc: "🏛️ FOMC 利率决议",
+                vFomc: "波动: 极高",
+                dFomc: "包含：决议(2:00) + 点阵图 + 鲍威尔讲话(2:30)。",
+                hFomcDot: "📉 点阵图 (Dot Plot) 才是重点",
+                expDot: "不要只看当下加不加息，要看官员对'年底利率'的预测中位数是上移还是下移。",
+                resHawk: "鹰派发言:",
+                resDove: "鸽派发言:",
+
+                // Super Week & Others
+                tSuper: "💣 超级周 (Super Week)",
+                dSuper: "定义：当 CPI (周二) 和 FOMC (周三) 在同一周。",
+                advSuper: "策略：全周降低杠杆，不做日内波段。等待周四趋势明朗。",
+                tPpi: "PPI & 初请失业金",
+                dPpi: "通常周四晚公布。重要性次于 CPI，但如果 CPI 没方向，PPI 会补刀。",
+
+                footer: "数据波动仅供参考。市场永远是对的。\nAlways DYOR."
+            },
+            en: {
+                title: "Macro Calendar Pro",
+                timezone: "🕒 Timezone: Beijing (UTC+8)",
+                secCritical: "🔥 Tier 1 Events",
+                secSpecial: "⚡ Special Patterns",
+
+                // CPI
+                tCpi: "🇺🇸 CPI Inflation",
+                vCpi: "Vol: High",
+                dCpi: "Foundation of Fed policy. Decides Hike vs Cut.",
+                hCpiHist: "📊 Avg Volatility (Last 5 events)",
+                resCpiHigh: "Higher > 0.2%:",
+                resCpiLow: "Lower > 0.2%:",
+                noteCpi: "⚠️ Note: Matching forecast often leads to 'Sell the News'.",
+
+                // NFP
+                tNfp: "🇺🇸 NFP Payrolls",
+                vNfp: "Vol: High",
+                dNfp: "King of 'Fake-outs'. Must watch Unemployment Rate too.",
+                hNfpLogic: "🧠 Trader's Thresholds",
+                nfpRecession: "Recession Fear (Dump)",
+                nfpGoldilocks: "Goldilocks (Grind Up)",
+                nfpHot: "Too Hot / Hike Risk (Dump)",
+                noteNfp: "💡 Tip: The first 1-min candle after NFP is usually a fake move.",
+
+                // FOMC
+                tFomc: "🏛️ FOMC Rate Decision",
+                vFomc: "Vol: Extreme",
+                dFomc: "Includes: Decision + Dot Plot + Powell Speech.",
+                hFomcDot: "📉 The 'Dot Plot' is Key",
+                expDot: "Ignore the current hike. Look at the median forecast for Year-End rates.",
+                resHawk: "Hawkish Speech:",
+                resDove: "Dovish Speech:",
+
+                // Super Week
+                tSuper: "💣 Super Week",
+                dSuper: "Definition: When CPI (Tue) and FOMC (Wed) align.",
+                advSuper: "Strategy: De-leverage all week. Wait for Thursday trend.",
+                tPpi: "PPI & Jobless Claims",
+                dPpi: "Thu Nights. Tier 2, but moves market if CPI was neutral.",
+
+                footer: "Volatility stats for reference only. Market is always right.\nAlways DYOR."
+            }
+        };
+
+        function updateWidget(langCode) {
+            const container = document.getElementById('tv-widget-box');
+            container.innerHTML = ''; 
+
+            const div = document.createElement('div');
+            div.className = 'tradingview-widget-container__widget';
+            container.appendChild(div);
+
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-events.js';
+            script.async = true;
+            
+            const locale = langCode === 'zh' ? 'zh_CN' : 'en';
+
+            script.innerHTML = JSON.stringify({
+                "colorTheme": "dark",
+                "isTransparent": true,
+                "width": "100%",
+                "height": "100%",
+                "locale": locale,
+                "importanceFilter": "0,1", 
+                "countryFilter": "us,eu,cn,jp,gb",
+                "timezone": "Asia/Shanghai" // 强制北京时间
+            });
+            container.appendChild(script);
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            const t = i18n[currentLang];
+
+            // Update UI Text
+            const ids = [
+                ['txt-title', 'title'], ['txt-timezone', 'timezone'], ['txt-sec-critical', 'secCritical'], ['txt-sec-special', 'secSpecial'],
+                ['t-cpi', 'tCpi'], ['v-cpi', 'vCpi'], ['d-cpi', 'dCpi'], ['h-cpi-hist', 'hCpiHist'], ['res-cpi-high', 'resCpiHigh'], ['res-cpi-low', 'resCpiLow'], ['note-cpi', 'noteCpi'],
+                ['t-nfp', 'tNfp'], ['v-nfp', 'vNfp'], ['d-nfp', 'dNfp'], ['h-nfp-logic', 'hNfpLogic'], ['nfp-recession', 'nfpRecession'], ['nfp-goldilocks', 'nfpGoldilocks'], ['nfp-hot', 'nfpHot'], ['note-nfp', 'noteNfp'],
+                ['t-fomc', 'tFomc'], ['v-fomc', 'vFomc'], ['d-fomc', 'dFomc'], ['h-fomc-dot', 'hFomcDot'], ['exp-dot', 'expDot'], ['res-hawk', 'resHawk'], ['res-dove', 'resDove'],
+                ['t-super', 'tSuper'], ['d-super', 'dSuper'], ['adv-super', 'advSuper'], ['t-ppi', 'tPpi'], ['d-ppi', 'dPpi'], ['txt-footer', 'footer']
+            ];
+
+            ids.forEach(pair => {
+                const el = document.getElementById(pair[0]);
+                if(el) el.innerText = t[pair[1]];
+            });
+
+            updateWidget(currentLang);
+        }
+
+        updateWidget('zh');
+    </script>
+</body>
+</html>
